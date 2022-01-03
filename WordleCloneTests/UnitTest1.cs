@@ -11,13 +11,13 @@ namespace WordleCloneTests
         public void Test1()
         {
             Row row = new Row("PILOT");
-            Flag[] result =  row.Guess("AAAAA");
+            row.Mark("AAAAA");
 
-            Assert.Equal(Flag.Wrong, result[0]);
-            Assert.Equal(Flag.Wrong, result[1]);
-            Assert.Equal(Flag.Wrong, result[2]);
-            Assert.Equal(Flag.Wrong, result[3]);
-            Assert.Equal(Flag.Wrong, result[4]);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[0].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[1].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[2].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[3].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[4].Value);
             Assert.False(row.Correct);
         }
 
@@ -25,13 +25,13 @@ namespace WordleCloneTests
         public void Test2()
         {
             Row row = new Row("PILOT");
-            Flag[] result = row.Guess("TAAAA");
+            row.Mark("TAAAA");
 
-            Assert.Equal(Flag.Partial, result[0]);
-            Assert.Equal(Flag.Wrong, result[1]);
-            Assert.Equal(Flag.Wrong, result[2]);
-            Assert.Equal(Flag.Wrong, result[3]);
-            Assert.Equal(Flag.Wrong, result[4]);
+            Assert.Equal(Mark.Partial, row.MarkedGuess[0].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[1].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[2].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[3].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[4].Value);
             Assert.False(row.Correct);
         }
 
@@ -39,13 +39,13 @@ namespace WordleCloneTests
         public void Test3()
         {
             Row row = new Row("PILOT");
-            Flag[] result = row.Guess("TAAAT");
+            row.Mark("TAAAT");
 
-            Assert.Equal(Flag.Partial, result[0]);
-            Assert.Equal(Flag.Wrong, result[1]);
-            Assert.Equal(Flag.Wrong, result[2]);
-            Assert.Equal(Flag.Wrong, result[3]);
-            Assert.Equal(Flag.Right, result[4]);
+            Assert.Equal(Mark.Partial, row.MarkedGuess[0].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[1].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[2].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[3].Value);
+            Assert.Equal(Mark.Right, row.MarkedGuess[4].Value);
             Assert.False(row.Correct);
         }
 
@@ -53,13 +53,13 @@ namespace WordleCloneTests
         public void Test4()
         {
             Row row = new Row("PILOT");
-            Flag[] result = row.Guess("PILOT");
+            row.Mark("PILOT");
 
-            Assert.Equal(Flag.Right, result[0]);
-            Assert.Equal(Flag.Right, result[1]);
-            Assert.Equal(Flag.Right, result[2]);
-            Assert.Equal(Flag.Right, result[3]);
-            Assert.Equal(Flag.Right, result[4]);
+            Assert.Equal(Mark.Right, row.MarkedGuess[0].Value);
+            Assert.Equal(Mark.Right, row.MarkedGuess[1].Value);
+            Assert.Equal(Mark.Right, row.MarkedGuess[2].Value);
+            Assert.Equal(Mark.Right, row.MarkedGuess[3].Value);
+            Assert.Equal(Mark.Right, row.MarkedGuess[4].Value);
             Assert.True(row.Correct);
         }
 
@@ -73,33 +73,34 @@ namespace WordleCloneTests
         }
 
         public string Answer { get; }
-        public bool Correct { get; private set; }
+        public bool Correct => MarkedGuess.All(o => o.Value == WordleCloneTests.Mark.Right);
+        internal IList<KeyValuePair<char, Mark>> MarkedGuess { get;  } = new List<KeyValuePair<char, Mark>>();
 
-        internal Flag[] Guess(string guess)
+        internal void Mark(string guess)
         {
-            var ret = Enumerable.Repeat(Flag.Wrong, Answer.Length).ToArray();
-
-            int i = 0;
-            foreach (var letter in guess)
+            for (int i = 0; i < guess.Length; i++)
             {
+                var letter = guess[i];
+                Mark mark;
 
                 if (Answer[i].Equals(letter))
                 {
-                    ret[i] = Flag.Right;
-                } else if (Answer.Contains(letter))
-                {
-                    ret[i] = Flag.Partial;
+                    mark = WordleCloneTests.Mark.Right;
                 }
-                i++;
-
+                else if (Answer.Contains(letter))
+                {
+                    mark = WordleCloneTests.Mark.Partial;
+                }
+                else
+                {
+                    mark = WordleCloneTests.Mark.Wrong;
+                }
+                MarkedGuess.Add(new KeyValuePair<char, Mark>(letter, mark));
             }
-
-            Correct = Answer.Equals(guess,StringComparison.InvariantCultureIgnoreCase);
-            return ret;
         }
     }
 
-    enum Flag
+    enum Mark
     {
         Wrong,
         Right,
