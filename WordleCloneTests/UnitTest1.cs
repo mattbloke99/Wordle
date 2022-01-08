@@ -63,6 +63,34 @@ namespace WordleCloneTests
             Assert.True(row.Correct);
         }
 
+
+        [Fact]
+        public void GameTest1()
+        {
+            var game = new Game("PILOT");
+            game.Guess("AAAAA");
+            Assert.Equal(1, game.Rows.Count);
+
+        }
+
+    }
+
+    internal class Game
+    {
+        public Game(string answer)
+        {
+            Answer = answer;
+        }
+
+        public string Answer { get; }
+        public IList<Row> Rows { get; internal set; } = new List<Row>();
+
+        internal void Guess(string guess)
+        {
+            var row = new Row(Answer);
+            row.Mark(guess);
+            Rows.Add(row);
+        }
     }
 
     public class Row
