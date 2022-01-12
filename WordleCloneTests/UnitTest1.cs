@@ -1,3 +1,4 @@
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,11 @@ namespace WordleCloneTests
 {
     public class UnitTest1
     {
+        Mock<IWordDictionary> mockDictionaryObject = new Mock<IWordDictionary>();
+
+
         [Fact]
-        public void Test1()
+        public void MarkRowAllWrong()
         {
             Row row = new Row("PILOT");
             row.Mark("AAAAA");
@@ -22,7 +26,7 @@ namespace WordleCloneTests
         }
 
         [Fact]
-        public void Test2()
+        public void MarkRowRightLetterWrongPosition()
         {
             Row row = new Row("PILOT");
             row.Mark("TAAAA");
@@ -36,7 +40,7 @@ namespace WordleCloneTests
         }
 
         [Fact]
-        public void Test3()
+        public void MarkRowRightLetterWrongAndRightPosition()
         {
             Row row = new Row("PILOT");
             row.Mark("TAAAT");
@@ -50,7 +54,7 @@ namespace WordleCloneTests
         }
 
         [Fact]
-        public void Test4()
+        public void MarkRowAllRight()
         {
             Row row = new Row("PILOT");
             row.Mark("PILOT");
@@ -65,31 +69,147 @@ namespace WordleCloneTests
 
 
         [Fact]
-        public void GameTest1()
+        public void Game1IncorrectGuess()
         {
-            var game = new Game("PILOT");
+            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+
+            var game = new Game("PILOT", mockDictionaryObject.Object);
             game.Guess("AAAAA");
             Assert.Equal(1, game.Rows.Count);
+            Assert.False(game.Won);
+            Assert.Equal(5, game.RemainingGuesses);
 
+        }
+
+        [Fact]
+        public void Game2IncorrectGuesses()
+        {
+            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+
+            var game = new Game("PILOT", mockDictionaryObject.Object);
+            game.Guess("AAAAA");
+            game.Guess("BBBBB");
+            Assert.Equal(2, game.Rows.Count);
+            Assert.False(game.Won);
+            Assert.Equal(4, game.RemainingGuesses);
+        }
+
+        [Fact]
+        public void GameCorrectGuess()
+        {
+            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+
+            var game = new Game("PILOT", mockDictionaryObject.Object);
+            game.Guess("PILOT");
+            Assert.True(game.Won);
+        }
+
+        [Fact]
+        public void Game6IncorrectGuesses()
+        {
+            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+
+            var game = new Game("PILOT", mockDictionaryObject.Object);
+            game.Guess("AAAAA");
+            game.Guess("BBBBB");
+            game.Guess("CCCCC");
+            game.Guess("DDDDD");
+            game.Guess("EEEEE");
+            game.Guess("FFFFF");
+            Assert.Equal(6, game.Rows.Count);
+            Assert.False(game.Won);
+            Assert.Equal(0, game.RemainingGuesses);
+        }
+
+        [Fact]
+        public void WordDictionaryLookupTest()
+        {
+            IWordDictionary dictionary = new WordDictionary(new string[] { "STORE", "RAIN" });
+            Assert.True(dictionary.Lookup("STORE"));
+            Assert.False(dictionary.Lookup("AAAAA"));
+        }
+
+
+        [Fact]
+        public void GameValidWordGuess()
+        {
+            Mock<IWordDictionary> mockDictionaryObject = new Mock<IWordDictionary>();
+
+            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+
+            var game = new Game("PILOT", mockDictionaryObject.Object);
+            Assert.Equal(GuessCode.OK, game.Guess("AAAAA"));
+        }
+
+        [Fact]
+        public void GameInvalidWordGuess()
+        {
+            Mock<IWordDictionary> mockDictionaryObject = new Mock<IWordDictionary>();
+
+            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(false);
+
+            var game = new Game("PILOT", mockDictionaryObject.Object);
+            Assert.Equal(GuessCode.WordNotInDictionary, game.Guess("AAAAA"));
         }
 
     }
 
+    public interface IWordDictionary
+    {
+        bool Lookup(string word);
+    }
+
+    public class WordDictionary : IWordDictionary
+    {
+        public WordDictionary(string[] dictionary)
+        {
+            Dictionary = dictionary;
+        }
+
+        public string[] Dictionary { get; }
+
+        public bool Lookup(string word)
+        {
+            return Dictionary.Contains(word);
+        }
+
+    }
+
+    internal enum GuessCode
+    {
+        IncorrectSpelling,
+        WordNotInDictionary,
+        OK
+    }
+
     internal class Game
     {
-        public Game(string answer)
+        const int GuessQuantity = 6;
+        private readonly IWordDictionary dictionary;
+
+        public Game(string answer, IWordDictionary dictionary)
         {
             Answer = answer;
+            this.dictionary = dictionary;
         }
 
         public string Answer { get; }
         public IList<Row> Rows { get; internal set; } = new List<Row>();
+        public bool Won => Rows.Last().Correct;
 
-        internal void Guess(string guess)
+        public int RemainingGuesses => GuessQuantity - Rows.Count;
+
+        internal GuessCode Guess(string guess)
         {
+            if (!dictionary.Lookup(guess))
+            {
+                return GuessCode.WordNotInDictionary;
+            }
+
             var row = new Row(Answer);
             row.Mark(guess);
             Rows.Add(row);
+            return GuessCode.OK;
         }
     }
 
