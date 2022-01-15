@@ -27,7 +27,7 @@ namespace WordleClone
 
         private void PlayGame()
         {
-            Game game = new Game("PILOT", new WordDictionary(new[] {"AAAAA"}));
+            Game game = new Game(new WordDictionary(new[] { "PILOT" }));
             Row row;
 
             do

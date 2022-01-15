@@ -6,14 +6,19 @@ namespace WordleCloneTests
 {
     public class GameTests
     {
-        Mock<IWordDictionary> mockDictionaryObject = new Mock<IWordDictionary>();
+        Mock<IWordDictionary> _mockDictionaryObject = new Mock<IWordDictionary>();
+
+        public GameTests()
+        {
+            _mockDictionaryObject.Setup(x => x.GenerateRandomWord(It.IsAny<int>())).Returns("PILOT");
+        }
 
         [Fact]
         public void Game1IncorrectGuess()
         {
-            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+            _mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
 
-            var game = new Game("PILOT", mockDictionaryObject.Object);
+            var game = new Game(_mockDictionaryObject.Object);
             game.Guess("AAAAA");
             Assert.Equal(1, game.Rows.Count);
             Assert.False(game.Won);
@@ -24,9 +29,9 @@ namespace WordleCloneTests
         [Fact]
         public void Game2IncorrectGuesses()
         {
-            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+            _mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
 
-            var game = new Game("PILOT", mockDictionaryObject.Object);
+            var game = new Game(_mockDictionaryObject.Object);
             game.Guess("AAAAA");
             game.Guess("BBBBB");
             Assert.Equal(2, game.Rows.Count);
@@ -37,9 +42,9 @@ namespace WordleCloneTests
         [Fact]
         public void GameCorrectGuess()
         {
-            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+            _mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
 
-            var game = new Game("PILOT", mockDictionaryObject.Object);
+            var game = new Game(_mockDictionaryObject.Object);
             game.Guess("PILOT");
             Assert.True(game.Won);
         }
@@ -47,9 +52,9 @@ namespace WordleCloneTests
         [Fact]
         public void Game6IncorrectGuesses()
         {
-            mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
+            _mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
 
-            var game = new Game("PILOT", mockDictionaryObject.Object);
+            var game = new Game(_mockDictionaryObject.Object);
             game.Guess("AAAAA");
             game.Guess("BBBBB");
             game.Guess("CCCCC");
@@ -62,22 +67,13 @@ namespace WordleCloneTests
         }
 
         [Fact]
-        public void WordDictionaryLookupTest()
-        {
-            IWordDictionary dictionary = new WordDictionary(new string[] { "STORE", "RAIN" });
-            Assert.True(dictionary.Lookup("STORE"));
-            Assert.False(dictionary.Lookup("AAAAA"));
-        }
-
-
-        [Fact]
         public void GameValidWordGuess()
         {
             Mock<IWordDictionary> mockDictionaryObject = new Mock<IWordDictionary>();
-
+            mockDictionaryObject.Setup(x => x.GenerateRandomWord(It.IsAny<int>())).Returns("PILOT");
             mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(true);
 
-            var game = new Game("PILOT", mockDictionaryObject.Object);
+            var game = new Game(mockDictionaryObject.Object);
             Assert.Equal(GuessCode.OK, game.Guess("AAAAA"));
         }
 
@@ -88,7 +84,7 @@ namespace WordleCloneTests
 
             mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(false);
 
-            var game = new Game("PILOT", mockDictionaryObject.Object);
+            var game = new Game(mockDictionaryObject.Object);
             Assert.Equal(GuessCode.WordNotInDictionary, game.Guess("AAAAA"));
         }
     }

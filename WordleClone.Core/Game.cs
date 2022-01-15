@@ -3,15 +3,16 @@
     public class Game
     {
         const int GuessQuantity = 6;
+        const int WordLength = 5;
         private readonly IWordDictionary dictionary;
 
-        public Game(string answer, IWordDictionary dictionary)
+        public Game(IWordDictionary dictionary)
         {
-            Answer = answer;
+            _answer = dictionary.GenerateRandomWord(WordLength);
             this.dictionary = dictionary;
         }
 
-        public string Answer { get; }
+        private string _answer { get; }
         public IList<Row> Rows { get; internal set; } = new List<Row>();
         public bool Won => Rows.Last().Correct;
 
@@ -24,7 +25,7 @@
                 return GuessCode.WordNotInDictionary;
             }
 
-            var row = new Row(Answer);
+            var row = new Row(_answer);
             row.Mark(guess);
             Rows.Add(row);
             return GuessCode.OK;

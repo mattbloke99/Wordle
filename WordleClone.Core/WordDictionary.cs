@@ -4,14 +4,19 @@
     {
         public WordDictionary(string[] dictionary)
         {
-            Dictionary = dictionary;
+            _dictionary = dictionary;
         }
 
-        public string[] Dictionary { get; }
+        private string[] _dictionary { get; } = new string[0];
 
         public bool Lookup(string word)
         {
-            return Dictionary.Contains(word);
+            return _dictionary.Contains(word);
+        }
+
+        public string GenerateRandomWord(int wordLength)
+        {
+            return _dictionary.Where(x => x.Length == wordLength).OrderBy(x => Guid.NewGuid()).FirstOrDefault();
         }
     }
 }
