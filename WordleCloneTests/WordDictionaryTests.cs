@@ -11,6 +11,7 @@ namespace WordleCloneTests
         {
             IWordDictionary dictionary = new WordDictionary(new string[] { "STORE", "BRAIN" });
             Assert.True(dictionary.Lookup("STORE"));
+            Assert.True(dictionary.Lookup("store"));
             Assert.False(dictionary.Lookup("AAAAA"));
         }
 

@@ -13,6 +13,8 @@
 
         public void Mark(string guess)
         {
+            guess = guess.ToUpper();
+
             for (int i = 0; i < guess.Length; i++)
             {
                 var letter = guess[i];
@@ -32,6 +34,11 @@
                 }
                 MarkedGuess.Add(new KeyValuePair<char, Mark>(letter, mark));
             }
+        }
+
+        public string Render()
+        {
+            return string.Join(" ", MarkedGuess.Select(o => o.Value.ToString()));
         }
     }
 }

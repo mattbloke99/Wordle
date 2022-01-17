@@ -3,7 +3,8 @@
     public enum GuessCode
     {
         IncorrectSpelling,
-        WordNotInDictionary,
-        OK
+        //WordNotInDictionary,
+        OK,
+        WrongLength
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,6 +9,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WordleClone.Core\WordleClone.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="words-english.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

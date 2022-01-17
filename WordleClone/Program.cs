@@ -7,54 +7,64 @@ namespace WordleClone
 
         static void Main()
         {
-            ConsoleGame consoleGame = new ConsoleGame();
-            consoleGame.GameLoop();
-        }
-
-        public void GameLoop()
-        {
             DisplayIntroText();
-
             do
             {
-                PlayGame();
+                var file = File.ReadAllLines("words-english.txt");
+                Game game = new Game(new WordDictionary(file));
+
+                PlayGame(game);
             } while (TryAgain());
-
-
-     
-
         }
 
-        private void PlayGame()
+        static private void PlayGame(IGame game)
         {
-            Game game = new Game(new WordDictionary(new[] { "PILOT" }));
-            Row row;
-
             do
             {
                 string wordGuess = Console.ReadLine();
 
-                if (game.Guess(wordGuess) == GuessCode.WordNotInDictionary)
+                if (game.Guess(wordGuess) == GuessCode.IncorrectSpelling)
                 {
                     Console.WriteLine($"{wordGuess} not in dictionary");
+                } else
+                {
+                    Row row = game.GetLastRow();
+
+                    foreach (var item in row.MarkedGuess)
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+
+                        switch (item.Value)
+                        {
+                            case Mark.Right:
+                                Console.BackgroundColor = ConsoleColor.Green;
+                                break;
+                            case Mark.Partial:
+                                Console.BackgroundColor = ConsoleColor.Yellow;
+                                Console.BackgroundColor = ConsoleColor.Black;
+                                break;
+                            default:
+                                Console.BackgroundColor = ConsoleColor.Black;
+                                break;
+                        }
+                        Console.Write(item.Key);
+                        Console.ResetColor();
+                    }
+                    Console.WriteLine();
                 }
-
-                row = game.Rows.Last();
-
-
-            } while (game.RemainingGuesses > 0 || !row.Correct);
+            } while (game.RemainingGuesses > 0 && !game.Won);
 
 
-            if(game.Rows.Last().Correct)
+            if(game.Won)
             {
-                Console.WriteLine("You have won");
-                return;
+                Console.WriteLine($"You have won in {game.GuessesMade} guess");
+            } else
+            {
+                Console.WriteLine($"You have lost, the answer was {game.Answer}");
             }
-                Console.WriteLine("You have lost");
-
         }
 
-        private bool TryAgain()
+        private static bool TryAgain()
         {
             Console.WriteLine("ANOTHER WORDLE? (YES OR NO)? ");
             return IsInputYes(Console.ReadLine());
@@ -66,7 +76,7 @@ namespace WordleClone
             return options.Any(o => o.Equals(consoleInput, StringComparison.CurrentCultureIgnoreCase));
         }
 
-        private void DisplayIntroText()
+        private static void DisplayIntroText()
         {
             Console.WriteLine("PLAY WORDLE");
         }

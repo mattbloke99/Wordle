@@ -13,6 +13,21 @@ namespace WordleCloneTests
             _mockDictionaryObject.Setup(x => x.GenerateRandomWord(It.IsAny<int>())).Returns("PILOT");
         }
 
+
+        [Fact]
+        public void GameWordNotInDictionaryGuess()
+        {
+            _mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(false);
+
+            var game = new Game(_mockDictionaryObject.Object);
+            game.Guess("AAAAA");
+            Assert.Equal(0, game.GuessesMade);
+            Assert.False(game.Won);
+            Assert.Equal(6, game.RemainingGuesses);
+            Assert.Null(game.GetLastRow());
+
+        }
+
         [Fact]
         public void Game1IncorrectGuess()
         {
@@ -20,10 +35,10 @@ namespace WordleCloneTests
 
             var game = new Game(_mockDictionaryObject.Object);
             game.Guess("AAAAA");
-            Assert.Equal(1, game.Rows.Count);
+            Assert.Equal(1, game.GuessesMade);
             Assert.False(game.Won);
             Assert.Equal(5, game.RemainingGuesses);
-
+            Assert.NotNull(game.GetLastRow());
         }
 
         [Fact]
@@ -34,7 +49,7 @@ namespace WordleCloneTests
             var game = new Game(_mockDictionaryObject.Object);
             game.Guess("AAAAA");
             game.Guess("BBBBB");
-            Assert.Equal(2, game.Rows.Count);
+            Assert.Equal(2, game.GuessesMade);
             Assert.False(game.Won);
             Assert.Equal(4, game.RemainingGuesses);
         }
@@ -61,7 +76,7 @@ namespace WordleCloneTests
             game.Guess("DDDDD");
             game.Guess("EEEEE");
             game.Guess("FFFFF");
-            Assert.Equal(6, game.Rows.Count);
+            Assert.Equal(6, game.GuessesMade);
             Assert.False(game.Won);
             Assert.Equal(0, game.RemainingGuesses);
         }
@@ -78,14 +93,21 @@ namespace WordleCloneTests
         }
 
         [Fact]
-        public void GameInvalidWordGuess()
+        public void GameWordNotInDictionaryWordGuess()
         {
             Mock<IWordDictionary> mockDictionaryObject = new Mock<IWordDictionary>();
-
+            mockDictionaryObject.Setup(x => x.GenerateRandomWord(It.IsAny<int>())).Returns("PILOT");
             mockDictionaryObject.Setup(x => x.Lookup(It.IsAny<string>())).Returns(false);
 
             var game = new Game(mockDictionaryObject.Object);
-            Assert.Equal(GuessCode.WordNotInDictionary, game.Guess("AAAAA"));
+            Assert.Equal(GuessCode.IncorrectSpelling, game.Guess("AAAAA"));
+        }
+
+        [Fact]
+        public void GameWordTooShortGuess()
+        {
+            var game = new Game(_mockDictionaryObject.Object);
+            Assert.Equal(GuessCode.WrongLength, game.Guess("AAAA"));
         }
     }
 }

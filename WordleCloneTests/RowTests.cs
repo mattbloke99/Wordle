@@ -21,6 +21,9 @@ namespace WordleCloneTests
             Assert.Equal(Mark.Wrong, row.MarkedGuess[3].Value);
             Assert.Equal(Mark.Wrong, row.MarkedGuess[4].Value);
             Assert.False(row.Correct);
+
+            Assert.Equal("Wrong Wrong Wrong Wrong Wrong", row.Render());
+
         }
 
         [Fact]
@@ -35,6 +38,8 @@ namespace WordleCloneTests
             Assert.Equal(Mark.Wrong, row.MarkedGuess[3].Value);
             Assert.Equal(Mark.Wrong, row.MarkedGuess[4].Value);
             Assert.False(row.Correct);
+
+            Assert.Equal("Partial Wrong Wrong Wrong Wrong", row.Render());
         }
 
         [Fact]
@@ -49,6 +54,8 @@ namespace WordleCloneTests
             Assert.Equal(Mark.Wrong, row.MarkedGuess[3].Value);
             Assert.Equal(Mark.Right, row.MarkedGuess[4].Value);
             Assert.False(row.Correct);
+
+            Assert.Equal("Partial Wrong Wrong Wrong Right", row.Render());
         }
 
         [Fact]
@@ -63,6 +70,34 @@ namespace WordleCloneTests
             Assert.Equal(Mark.Right, row.MarkedGuess[3].Value);
             Assert.Equal(Mark.Right, row.MarkedGuess[4].Value);
             Assert.True(row.Correct);
+
+            Assert.Equal("Right Right Right Right Right", row.Render());
+        }
+
+        [Fact]
+        public void HandleLowerCase()
+        {
+            Row row = new Row("PILOT");
+            row.Mark("pilot");
+
+            Assert.True(row.Correct);
+
+            Assert.Equal("Right Right Right Right Right", row.Render());
+        }
+
+        [Fact]
+        public void HandleDoubleLettersCase()
+        {
+            Row row = new Row("LOBBY");
+            row.Mark("build");
+
+            Assert.Equal(Mark.Partial, row.MarkedGuess[0].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[1].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[2].Value);
+            Assert.Equal(Mark.Partial, row.MarkedGuess[3].Value);
+            Assert.Equal(Mark.Wrong, row.MarkedGuess[4].Value);
+
+            Assert.False(row.Correct);
         }
     }
 }

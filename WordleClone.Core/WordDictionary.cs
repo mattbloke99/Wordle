@@ -11,12 +11,12 @@
 
         public bool Lookup(string word)
         {
-            return _dictionary.Contains(word);
+            return _dictionary.Contains(word, StringComparer.OrdinalIgnoreCase);
         }
 
         public string GenerateRandomWord(int wordLength)
         {
-            return _dictionary.Where(x => x.Length == wordLength).OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+            return _dictionary.Where(x => x.Length == wordLength).OrderBy(x => Guid.NewGuid()).FirstOrDefault().ToUpper();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace WordleClone.Core
 {
-    public class Game
+    public class Game : IGame
     {
         const int GuessQuantity = 6;
         const int WordLength = 5;
@@ -8,27 +8,35 @@
 
         public Game(IWordDictionary dictionary)
         {
-            _answer = dictionary.GenerateRandomWord(WordLength);
+            Answer = dictionary.GenerateRandomWord(WordLength);
             this.dictionary = dictionary;
         }
 
-        private string _answer { get; }
-        public IList<Row> Rows { get; internal set; } = new List<Row>();
-        public bool Won => Rows.Last().Correct;
+        public string Answer { get; }
+        private IList<Row> Rows { get; set; } = new List<Row>();
+        public bool Won =>  GetLastRow()?.Correct ?? false;
 
-        public int RemainingGuesses => GuessQuantity - Rows.Count;
+        public int GuessesMade => Rows.Count;
+        public int RemainingGuesses => GuessQuantity - GuessesMade;
 
         public GuessCode Guess(string guess)
         {
-            if (!dictionary.Lookup(guess))
+            if (guess.Length != Answer.Length)
             {
-                return GuessCode.WordNotInDictionary;
+                return GuessCode.WrongLength;
             }
 
-            var row = new Row(_answer);
+            if (!dictionary.Lookup(guess))
+            {
+                return GuessCode.IncorrectSpelling;
+            }
+
+            var row = new Row(Answer);
             row.Mark(guess);
             Rows.Add(row);
             return GuessCode.OK;
         }
+
+        public Row? GetLastRow() => Rows?.LastOrDefault();
     }
 }
